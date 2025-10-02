@@ -91,10 +91,10 @@ export default function PersepolisFlowFieldLandingPage() {
                 depth: 0,
                 curveSegments: 32,
                 bevelEnabled: false,
-                bevelThickness: 0.03,
+                bevelThickness: 0.23,
                 bevelSize: 0.01,
                 bevelOffset: 0,
-                bevelSegments: 10,
+                bevelSegments: 20,
             })
 
             textGeometry.center();
@@ -193,7 +193,7 @@ export default function PersepolisFlowFieldLandingPage() {
             gpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0.0);
             gpu.particlesVariable.material.uniforms.uFlowFieldInfluence = new THREE.Uniform(1);
             gpu.particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(50);
-            gpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(0.13);
+            gpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(0.023);
             gpu.particlesVariable.material.uniforms.uMorphProgress = new THREE.Uniform(0.0);
             //gpu.particlesVariable.material.uniforms.uTarget = new THREE.Uniform(0.0);
             gpu.particlesVariable.material.uniforms.uTarget = new THREE.Uniform(targetParticlesTexture);
