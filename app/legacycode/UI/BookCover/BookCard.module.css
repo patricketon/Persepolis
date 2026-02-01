@@ -1,0 +1,63 @@
+
+
+.bookCardContainer {
+    padding: 0.5em;
+    position: relative;
+    text-align: center;
+    border-radius: 10px;
+    z-index: 2;
+    overflow: hidden;
+    
+} 
+
+@property --angle {
+ syntax: "<angle>";
+ initial-value: 0deg;
+ inherits: false;
+}
+
+.bookCardContainer::after, 
+.card::before {
+     --angle: 0deg;
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-image: conic-gradient(from var(--angle), transparent, rgba(245, 234, 176, 0.774) );
+    z-index: -1;
+    padding: 1px;
+    border-radius: 10px;
+    animation: 20s spin linear infinite; 
+    overflow: hidden;
+}
+
+.card {
+    position: relative;
+    background: rgba(255, 255, 255, 1.0);
+    border-radius: 10px;
+    height: 100%;
+    width: 100%;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.card::before {
+    filter: blur(1.5rem);
+    overflow: hidden;
+    
+}
+
+
+
+@keyframes spin {
+    from {
+        --angle: 0deg;
+    }
+    to {
+        --angle: 360deg;
+    }
+}
+

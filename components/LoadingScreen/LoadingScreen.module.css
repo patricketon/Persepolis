@@ -1,0 +1,149 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.8s ease-out;
+}
+
+.fadeOut {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Base logo styling */
+.logo {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  position: relative;
+  z-index: 4;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Bloom glow layers - stacked behind the main text */
+.glowOuter,
+.glowMiddle,
+.glowInner {
+  position: absolute;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  pointer-events: none;
+  user-select: none;
+}
+
+.glowOuter {
+  color: transparent;
+  filter: blur(60px);
+  text-shadow: 
+    0 0 80px rgba(138, 130, 255, 0.6),
+    0 0 120px rgba(138, 130, 255, 0.4),
+    0 0 160px rgba(138, 130, 255, 0.2);
+  z-index: 1;
+  animation: pulseOuter 4s ease-in-out infinite;
+}
+
+.glowMiddle {
+  color: transparent;
+  filter: blur(30px);
+  text-shadow: 
+    0 0 40px rgba(160, 150, 255, 0.7),
+    0 0 60px rgba(160, 150, 255, 0.5);
+  z-index: 2;
+  animation: pulseMiddle 4s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.glowInner {
+  color: transparent;
+  filter: blur(12px);
+  text-shadow: 
+    0 0 20px rgba(200, 195, 255, 0.8),
+    0 0 30px rgba(200, 195, 255, 0.6);
+  z-index: 3;
+  animation: pulseInner 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Subtle pulse animations for living glow */
+@keyframes pulseOuter {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulseMiddle {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes pulseInner {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Minimal loading bar */
+.loadingBar {
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.loadingProgress {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(160, 150, 255, 0.6),
+    rgba(200, 195, 255, 0.8),
+    rgba(160, 150, 255, 0.6),
+    transparent
+  );
+  border-radius: 1px;
+  animation: loadingSlide 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
