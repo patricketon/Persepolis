@@ -361,25 +361,51 @@ interface SearchGalleryProps {
   books: Book[];
 }
 
-function WaterPlane() {
-  const [ready, setReady] = useState(false);
+// function WaterPlane() {
+//   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    getWaterAssets().then(({ dudv, base, env }) => {
-      waterUniforms.iChannel0.value = base;
-      waterUniforms.iChannel1.value = env;
-      waterUniforms.iChannel2.value = dudv;
-      setReady(true);
-    });
-  }, []);
+//   useEffect(() => {
+//     getWaterAssets().then(({ dudv, base, env }) => {
+//       waterUniforms.iChannel0.value = base;
+//       waterUniforms.iChannel1.value = env;
+//       waterUniforms.iChannel2.value = dudv;
+//       setReady(true);
+//     });
+//   }, []);
+
+//   useFrame((state) => {
+//     if (!ready) return;
+//     waterUniforms.iTime.value = state.clock.elapsedTime;
+//     waterUniforms.inverseViewMatrix.value.copy(state.camera.matrixWorld);
+//   });
+
+//   if (!ready) return null;
+
+//   return (
+//     <mesh rotation={[-Math.PI / 2, 0, 0]}>
+//       <planeGeometry args={[50, 50]} />
+//       <shaderMaterial
+//         vertexShader={waterVertexShader}
+//         fragmentShader={waterFragmentShader}
+//         uniforms={waterUniforms}
+//       />
+//     </mesh>
+//   );
+// }
+
+function WaterPlane() {
+//   useEffect(() => {
+//     getWaterAssets().then(({ dudv, base, env }) => {
+//       waterUniforms.iChannel0.value = base;
+//       waterUniforms.iChannel1.value = env;
+//       waterUniforms.iChannel2.value = dudv;
+//     });
+//   }, []);
 
   useFrame((state) => {
-    if (!ready) return;
     waterUniforms.iTime.value = state.clock.elapsedTime;
     waterUniforms.inverseViewMatrix.value.copy(state.camera.matrixWorld);
   });
-
-  if (!ready) return null;
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]}>
@@ -392,6 +418,7 @@ function WaterPlane() {
     </mesh>
   );
 }
+
 
 export default function SearchGallery({ books }: SearchGalleryProps) {
   const featuredBooks = books.slice(0, 9);

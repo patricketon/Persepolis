@@ -155,6 +155,67 @@
 
 
 // SearchPage.tsx
+// 'use client';
+
+// import { useEffect, useState } from 'react';
+// import { useSearchParams } from 'next/navigation';
+// import { searchBooks } from '@/lib/books/searchBooks';
+// import { preloadBookTextures } from '@/lib/books/preloadTexture';
+// import { preloadWaterAssets } from '@/lib/water/preloadWaterAssets';
+// import SearchGallery from '@/components/Search3DGallery/SearchGallery';
+// import LoadingScreen from '@/components/LoadingScreen/LoadingScreen';
+// import type { Book } from '@/app/types/books';
+
+
+
+
+// export default function SearchPage() {
+//   const searchParams = useSearchParams();
+//   const query = searchParams.get('query') || '';
+
+//   const [books, setBooks] = useState<Book[]>([]);
+//   const [ready, setReady] = useState(false);
+
+  
+
+//   useEffect(() => {
+//     if (!query) return;
+
+//     let cancelled = false;
+//     setReady(false);
+
+//     (async () => {
+//       const results = await searchBooks(query);
+//       if (cancelled) return;
+
+//       setBooks(results);
+
+//       await Promise.all([
+//         preloadBookTextures(results),
+//         preloadWaterAssets(),
+//       ]);
+
+//       // small GPU warm-up buffer
+//       await new Promise((r) => setTimeout(r, 100));
+
+//       if (!cancelled) setReady(true);
+//     })();
+
+//     return () => {
+//       cancelled = true;
+//     };
+//   }, [query]);
+
+//   return (
+//     <div className="page-transparent">
+//       {!ready && <LoadingScreen isLoading minDuration={3000} />}
+//       {ready && <SearchGallery books={books} />}
+//     </div>
+//   );
+// }
+
+
+// SearchPage.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -163,8 +224,9 @@ import { searchBooks } from '@/lib/books/searchBooks';
 import { preloadBookTextures } from '@/lib/books/preloadTexture';
 import { preloadWaterAssets } from '@/lib/water/preloadWaterAssets';
 import SearchGallery from '@/components/Search3DGallery/SearchGallery';
-import LoadingScreen from '@/components/LoadingScreen';
+import LoadingScreen from '@/components/LoadingScreen/LoadingScreen';
 import type { Book } from '@/app/types/books';
+import { waterUniforms } from '@/components/water/WaterMaterial';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -185,12 +247,13 @@ export default function SearchPage() {
 
       setBooks(results);
 
-      await Promise.all([
-        preloadBookTextures(results),
-        preloadWaterAssets(),
-      ]);
+      const { dudv, base, env } = await preloadWaterAssets();
+      waterUniforms.iChannel0.value = base;
+      waterUniforms.iChannel1.value = env;
+      waterUniforms.iChannel2.value = dudv;
 
-      // small GPU warm-up buffer
+      await preloadBookTextures(results);
+
       await new Promise((r) => setTimeout(r, 100));
 
       if (!cancelled) setReady(true);

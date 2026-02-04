@@ -55,33 +55,127 @@
 // }
 
 
-// lib/books/searchBooks.ts
-import type { Book } from '@/app/types/books';
+// // lib/books/searchBooks.ts
+// import type { Book } from '@/app/types/books';
 
-import { getCoverUrl } from './cover';
+// import { getCoverUrl } from './cover';
+
+// export async function searchBooks(query: string): Promise<Book[]> {
+//   if (!query) return [];
+
+//   const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`);
+//   if (!response.ok) {
+//     throw new Error(`Search failed: ${response.status}`);
+//   }
+
+//   const data = await response.json();
+
+//   return data.docs.map((doc: any) => {
+//     const coverUrl = getCoverUrl(doc.cover_i);
+
+//     return {
+//       id: doc.key.replace('/works/', ''),
+//       title: doc.title,
+//       editionId: doc.edition_key?.[0],
+//       author: doc.author_name?.[0] || 'Unknown',
+//       year: doc.first_publish_year || undefined,
+//       imageLinks: coverUrl
+//         ? { thumbnail: coverUrl }
+//         : undefined,
+//     };
+//   });
+// }
+
+
+// lib/books/searchBooks.ts
+
+
+// lib/books/searchBooks.ts
+import type { Book } from '@/app/types/books'
+import { getCoverUrl } from './cover'
+
+const ENGLISH_PUBLISHERS = [
+  'Hay House',
+  'Penguin',
+  'Random House',
+  'HarperCollins',
+  'Simon & Schuster',
+  'Macmillan',
+  'Vintage',
+]
 
 export async function searchBooks(query: string): Promise<Book[]> {
-  if (!query) return [];
+  if (!query) return []
 
-  const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`);
-  if (!response.ok) {
-    throw new Error(`Search failed: ${response.status}`);
+  // 1. Broad search
+  const res = await fetch(
+    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=40`
+  )
+  if (!res.ok) throw new Error('Search failed')
+
+  const data = await res.json()
+  const docs = data.docs || []
+
+  // 2. Pick ONE authoritative English edition
+  const heroDoc = pickAuthoritativeEdition(docs)
+  if (!heroDoc) return []
+
+  const hero: Book = bookFromDoc(heroDoc)
+
+  // 3. Build recommendations (exclude same work)
+  const recs: Book[] = []
+  const seen = new Set([heroDoc.key])
+
+  for (const d of docs) {
+    if (recs.length >= 8) break
+    if (!d.cover_i) continue
+    if (!d.key || seen.has(d.key)) continue
+
+    seen.add(d.key)
+    recs.push(bookFromDoc(d))
   }
 
-  const data = await response.json();
+  return [hero, ...recs]
+}
 
-  return data.docs.map((doc: any) => {
-    const coverUrl = getCoverUrl(doc.cover_i);
+function pickAuthoritativeEdition(docs: any[]) {
+  const scored = docs
+    .filter(d => d.cover_i)
+    .map(d => ({
+      doc: d,
+      score: scoreEdition(d),
+    }))
+    .sort((a, b) => b.score - a.score)
 
-    return {
-      id: doc.key.replace('/works/', ''),
-      title: doc.title,
-      editionId: doc.edition_key?.[0],
-      author: doc.author_name?.[0] || 'Unknown',
-      year: doc.first_publish_year || undefined,
-      imageLinks: coverUrl
-        ? { thumbnail: coverUrl }
-        : undefined,
-    };
-  });
+  return scored[0]?.doc ?? null
+}
+
+function scoreEdition(d: any): number {
+  let score = 0
+
+  if (d.language?.includes('eng')) score += 1000
+
+  if (
+    ENGLISH_PUBLISHERS.some(p =>
+      d.publisher?.some((pub: string) => pub.includes(p))
+    )
+  ) {
+    score += 500
+  }
+
+  if (d.first_publish_year) score += d.first_publish_year
+
+  return score
+}
+
+function bookFromDoc(doc: any): Book {
+  return {
+    id: doc.key.replace('/works/', ''),
+    title: doc.title,
+    author: doc.author_name?.[0] || 'Unknown',
+    year: doc.first_publish_year,
+    imageLinks: doc.cover_i
+      ? { thumbnail: getCoverUrl(doc.cover_i)! }
+      : undefined,
+  }
 }

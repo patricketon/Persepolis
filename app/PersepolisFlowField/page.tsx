@@ -283,8 +283,12 @@ export default function PersepolisFlowFieldLandingPage() {
             particles.material = new THREE.ShaderMaterial({
                 vertexShader: vertex,
                 fragmentShader: fragment,
+             
                 uniforms: {
-                    uSize: new THREE.Uniform(0.01),
+                    uSize: new THREE.Uniform(0.15),
+                    uSizeStart: new THREE.Uniform(0.15),
+                    uSizeEnd: new THREE.Uniform(0.01),
+                    uMorphProgress: gpu.particlesVariable.material.uniforms.uMorphProgress,
                     uResolution: new THREE.Uniform(new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)),
                     uParticlesTexture: new THREE.Uniform(),
                 },
@@ -329,7 +333,7 @@ export default function PersepolisFlowFieldLandingPage() {
 
                 //initialize particle morphing
                 const morphStart = 4.0;
-                const morphDuration = 6.0;
+                const morphDuration = 7.0;
                 const morphProgress= Math.min(Math.max((elapsedTime - morphStart) / morphDuration, 0.0), 1.0);
 
                 const easeInProgress = Math.pow(morphProgress, 16.0);

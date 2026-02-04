@@ -516,6 +516,7 @@ export default function Book({
           transform
           rotation-y={-3 * Math.PI / 2}
           distanceFactor={5.5}
+          style={{ pointerEvents: 'auto' }}
         >
           <button
             onClick={onScheduleClick}

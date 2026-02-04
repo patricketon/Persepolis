@@ -23,7 +23,7 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSearch(true), 10500);
+    const timer = setTimeout(() => setShowSearch(true), 11400);
     return () => clearTimeout(timer);
   }, []);
 

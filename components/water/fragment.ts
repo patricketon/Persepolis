@@ -170,7 +170,7 @@ void main() {
     mirrorRepeat(uv + offset)
   ).rgb;
 
-  refractColor *= vec3(0.4, 0.6, 1.0);
+  refractColor *= vec3(0.6, 0.8, 1.0);
 
   // Fresnel
   float F0 = 0.02;
@@ -179,7 +179,9 @@ void main() {
     1.0
   );
 
+
   gl_FragColor = vec4(mix(refractColor, reflectColor, F * 0.75), 1.0);
+
 }
 
 
