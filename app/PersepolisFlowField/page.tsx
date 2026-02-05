@@ -228,7 +228,7 @@ export default function PersepolisFlowFieldLandingPage() {
             gpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0.0);
             gpu.particlesVariable.material.uniforms.uFlowFieldInfluence = new THREE.Uniform(1);
             gpu.particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(50);
-            gpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(0.023);
+            gpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(0.027);
             gpu.particlesVariable.material.uniforms.uMorphProgress = new THREE.Uniform(0.0);
             //gpu.particlesVariable.material.uniforms.uTarget = new THREE.Uniform(0.0);
             gpu.particlesVariable.material.uniforms.uTarget = new THREE.Uniform(targetParticlesTexture);
@@ -290,7 +290,7 @@ export default function PersepolisFlowFieldLandingPage() {
                     uSizeEnd: new THREE.Uniform(0.01),
                     uMorphProgress: gpu.particlesVariable.material.uniforms.uMorphProgress,
                     uResolution: new THREE.Uniform(new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)),
-                    uParticlesTexture: new THREE.Uniform(),
+                    uParticlesTexture: new THREE.Uniform(null),
                 },
                 transparent: true,
                 blending: THREE.AdditiveBlending,
@@ -323,7 +323,7 @@ export default function PersepolisFlowFieldLandingPage() {
             console.log('Scene children:', scene.children);
 
 
-            const easeInFunction = (t) => Math.pow(t, 2.0)
+            const easeInFunction = (t: number) => Math.pow(t, 2.0)
 
 
             const tick = () => {

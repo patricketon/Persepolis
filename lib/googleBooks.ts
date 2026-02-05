@@ -3,7 +3,7 @@
 // THIS CODE IS LEGACY AND SHOULD BE DELETED
 
 // Import the Book interface from BookCard
-import { Book } from '@/components/BookCard';
+import type { Book } from '@/app/types/books';
 
 export async function searchBooks(query: string): Promise<Book[]> {
   if (!query) return [];

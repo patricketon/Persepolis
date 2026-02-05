@@ -56,7 +56,7 @@ export default function SessionPicker({ bookId }: { bookId: string }) {
           return (
             <li key={s.id} className="text-black">
               {time} · {s.duration_minutes} min · {s.current_count}/{s.capacity}
-              <JoinButton sessionId={s.id}/>
+              <JoinButton sessionId={s.id} bookId={bookId}/>
             </li>
           )
         })}

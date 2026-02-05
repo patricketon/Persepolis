@@ -65,11 +65,6 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   handler satisfies AppPageConfig<"/EnterSheet">
 }
 
-// Validate ../../app/SearchResults/page.tsx
-{
-  const handler = {} as typeof import("../../app/SearchResults/page.js")
-  handler satisfies AppPageConfig<"/SearchResults">
-}
 
 // Validate ../../app/book/[id]/page.tsx
 {
@@ -91,7 +86,7 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 
 // Validate ../../app/searchPage/page.tsx
 {
-  const handler = {} as typeof import("../(app)/searchPage/page.jsx")
+  const handler = {} as typeof import("../(app)/searchPage/SearchPageClient.jsx")
   handler satisfies AppPageConfig<"/searchPage">
 }
 

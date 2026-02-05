@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabaseServer";
+import { supabaseServer } from "@/lib/supabaseServer";
+
+const supabase = supabaseServer();
 
 export async function POST(req: Request) {
   const { sessionId, userId } = await req.json();
@@ -7,7 +9,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  const supabase = createClient();
+  const supabase = supabaseServer();
 
   // 1) heartbeat update
   await supabase

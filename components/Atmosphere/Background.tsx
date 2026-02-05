@@ -36,7 +36,7 @@ export default function Background() {
         colors={["#4370df", "#09489ae3", "#d0d9e1", "#a39e9e", "#43588e"]}
         colorBack="#000000"
         colorBloom="#ffffff"
-        bloom={0.2}
+        bloom={0.25}
         intensity={0.8}
         density={0.035}
         spotty={0.2}

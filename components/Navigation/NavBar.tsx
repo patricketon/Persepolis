@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Search from '@/components/SearchButton/Search'
+import SearchShell from '@/components/SearchButton/SearchShell'
 
 export default function NavBar() {
   return (
@@ -23,7 +23,7 @@ export default function NavBar() {
       </Link>
 
       {/* Right: search */}
-      <Search
+      <SearchShell
         placeholder="Search books..."
         iconColor="black"
         className="

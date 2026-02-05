@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import styles from './BookCarousel.module.css';
-import type { Book } from '@/types/books';
+import type { Book } from '@/app/types/books';
 
 interface BookCardProps {
   book: Book;

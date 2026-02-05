@@ -6,6 +6,6 @@ export function searchBook(bookSearchInput: {name: string, slug?: string}) {
     bookSearchInput.name = xss(bookSearchInput.name);
 }
 
-export function saveBook(bookData) {
+export function saveBook(bookData: unknown) {
     console.log('SavingBook: ', bookData)
 }

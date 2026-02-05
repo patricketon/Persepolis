@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabaseServer";
+import { supabaseServer } from "@/lib/supabaseServer";
+
+const supabase = supabaseServer();
 
 export async function POST() {
-  const supabase = createClient();
+  const supabase = supabaseServer();
 
   const cutoff = new Date(Date.now() - 30_000).toISOString(); // 30s timeout
 

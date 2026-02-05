@@ -96,10 +96,12 @@ export default function SimpleCube() {
         let zoomStartTime = null;
         const zoomDuration = 1.5;
 
-        let panStartTime = null;
+      
+        let panStartTime: number | null = null;
         const panDuration = 1.0;
 
-        let finalZoomStartTime = null;
+        
+        let finalZoomStartTime: number | null = null;
         const finalZoomDuration = 2.0;
 
         zoomStartTime = clock.getElapsedTime();
