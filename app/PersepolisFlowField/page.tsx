@@ -83,10 +83,14 @@ export default function PersepolisFlowFieldLandingPage() {
         composer.addPass(outputPass);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
+        // controls.enableDamping = true;
+        // controls.enableRotate = true;
+        controls.enabled = false
 
         const gui = new GUI({ width: 340 });
+        gui.hide();
         const debugObject = { clearColor: '#e8e0b5' }
+        
         
 
         const backgroundGeometry = new THREE.PlaneGeometry(2, 2);
@@ -247,7 +251,7 @@ export default function PersepolisFlowFieldLandingPage() {
 
             gpu.debug.visible = false; 
             gpu.debug.position.x = 3
-            //scene.add(gpu.debug)
+           
 
             const particles: {
                 geometry: THREE.BufferGeometry;
