@@ -303,16 +303,16 @@ export default function PersepolisFlowFieldLandingPage() {
             scene.add(particles.points)
 
 
-            gui.addColor(debugObject, 'clearColor').onChange(() => renderer.setClearColor(debugObject.clearColor));
-            gui.add(particles.material.uniforms.uSize, 'value').min(0).max(1).step(0.001).name('uSize');
-            gui.add(gpu.particlesVariable.material.uniforms.uFlowFieldInfluence , 'value').min(0).max(1).step(0.001).name('FlowFieldInfluence');
-            gui.add(gpu.particlesVariable.material.uniforms.uFlowFieldStrength , 'value').min(0).max(20).step(0.001).name('FlowFieldStrength');
-            gui.add(gpu.particlesVariable.material.uniforms.uFlowFieldFrequency, 'value').min(0).max(1).step(0.001).name('FlowFieldFrequency');
-            gui.add(gpu.particlesVariable.material.uniforms.uMorphProgress, 'value').min(0).max(1).step(0.001).name('Morph Progress');
-            gui.add(bloomPass, 'strength').min(0).max(3).step(0.01).name('Bloom Strength');
-            gui.add(bloomPass, 'radius').min(0).max(1).step(0.01).name('Bloom Radius');
-            gui.add(bloomPass, 'threshold').min(0).max(1).step(0.01).name('Bloom Threshold');
-            gui.add(renderer, 'toneMappingExposure').min(0).max(3).step(0.01).name('Exposure');
+            // gui.addColor(debugObject, 'clearColor').onChange(() => renderer.setClearColor(debugObject.clearColor));
+            // gui.add(particles.material.uniforms.uSize, 'value').min(0).max(1).step(0.001).name('uSize');
+            // gui.add(gpu.particlesVariable.material.uniforms.uFlowFieldInfluence , 'value').min(0).max(1).step(0.001).name('FlowFieldInfluence');
+            // gui.add(gpu.particlesVariable.material.uniforms.uFlowFieldStrength , 'value').min(0).max(20).step(0.001).name('FlowFieldStrength');
+            // gui.add(gpu.particlesVariable.material.uniforms.uFlowFieldFrequency, 'value').min(0).max(1).step(0.001).name('FlowFieldFrequency');
+            // gui.add(gpu.particlesVariable.material.uniforms.uMorphProgress, 'value').min(0).max(1).step(0.001).name('Morph Progress');
+            // gui.add(bloomPass, 'strength').min(0).max(3).step(0.01).name('Bloom Strength');
+            // gui.add(bloomPass, 'radius').min(0).max(1).step(0.01).name('Bloom Radius');
+            // gui.add(bloomPass, 'threshold').min(0).max(1).step(0.01).name('Bloom Threshold');
+            // gui.add(renderer, 'toneMappingExposure').min(0).max(3).step(0.01).name('Exposure');
 
             const clock = new THREE.Clock();
             let previousTime = 0;
