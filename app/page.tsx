@@ -45,7 +45,7 @@ export default function Home() {
           iconColor="white"
           className=" px-14
           py-5
-          w-[40rem]
+          w-[35rem]
           text-[1.5rem]
           rounded-full
           border border-white/30
