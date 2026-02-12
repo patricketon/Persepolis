@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import type { Book } from '../../types/books';
+import type { Book } from '../../../types/books';
 
 const BookClient = dynamic(() => import('./BookClient'), {
   ssr: false,

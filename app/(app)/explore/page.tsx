@@ -316,7 +316,7 @@
 import * as THREE from 'three';
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { BOOKS } from '../data/books';
+import { BOOKS } from '@/app/data/books';
 import { useRouter } from 'next/navigation';
 
 interface BookBlock {

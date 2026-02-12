@@ -266,7 +266,7 @@ export function SessionTimePicker({ onSelect, onClose }: SessionTimePickerProps)
     const now = new Date()
     const results: Date[] = []
     const startHour = 6 // 6 AM
-    const endHour = 23 // 11 PM
+    const endHour = 24 // 11 PM
     
     for (let hour = startHour; hour < endHour; hour++) {
       if (duration === 60) {

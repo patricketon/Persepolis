@@ -607,7 +607,8 @@ export default function BookFrame({
           distanceFactor={15}
         >
           <button
-            className="px-2 py-1.5 bg-blue-900 text-white rounded-md hover:bg-[#0a0f1f]"
+            // className="px-2 py-1.5 bg-blue-900 text-white rounded-md hover:bg-[#0a0f1f]"
+            className="px-1.5 py-0.5 text-xs bg-blue-900/80 text-white rounded hover:bg-[#0a0f1f]"
 
             onClick={(e) => {
               e.stopPropagation();

@@ -215,7 +215,66 @@
 // }
 
 
-// SearchPage.tsx
+// // SearchPage.tsx
+// 'use client';
+
+// import { useEffect, useState } from 'react';
+// import { useSearchParams } from 'next/navigation';
+// import { searchBooks } from '@/lib/books/searchBooks';
+// import { preloadBookTextures } from '@/lib/books/preloadTexture';
+// import { preloadWaterAssets } from '@/lib/water/preloadWaterAssets';
+// import SearchGallery from '@/components/Search3DGallery/SearchGallery';
+// import LoadingScreen from '@/components/LoadingScreen/LoadingScreen';
+// import type { Book } from '@/app/types/books';
+// import { waterUniforms } from '@/components/water/WaterMaterial';
+
+// export default function SearchPageClient() {
+//   const searchParams = useSearchParams();
+//   const query = searchParams.get('query') || '';
+
+//   const [books, setBooks] = useState<Book[]>([]);
+//   const [ready, setReady] = useState(false);
+
+//   useEffect(() => {
+//     if (!query) {
+//       setBooks([]);
+//       setReady(true);
+//       return;
+//     }
+//     let cancelled = false;
+//     setReady(false);
+
+//     (async () => {
+//       const results = await searchBooks(query);
+//       if (cancelled) return;
+
+//       setBooks(results);
+
+//       const { dudv, base, env } = await preloadWaterAssets();
+//       waterUniforms.iChannel0.value = base;
+//       waterUniforms.iChannel1.value = env;
+//       waterUniforms.iChannel2.value = dudv;
+
+//       await preloadBookTextures(results);
+
+//       await new Promise((r) => setTimeout(r, 100));
+
+//       if (!cancelled) setReady(true);
+//     })();
+
+//     return () => {
+//       cancelled = true;
+//     };
+//   }, [query]);
+
+//   return (
+//     <div className="page-transparent">
+//       {!ready && <LoadingScreen isLoading minDuration={1000} />}
+//       {ready && <SearchGallery books={books} />}
+//     </div>
+//   );
+// }
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -227,16 +286,26 @@ import SearchGallery from '@/components/Search3DGallery/SearchGallery';
 import LoadingScreen from '@/components/LoadingScreen/LoadingScreen';
 import type { Book } from '@/app/types/books';
 import { waterUniforms } from '@/components/water/WaterMaterial';
+import { useBook } from '@/app/context/BookContext';
 
 export default function SearchPageClient() {
   const searchParams = useSearchParams();
-  const query = searchParams.get('query') || '';
+  const urlQuery = searchParams.get('query');
+  const { lastQuery, setLastQuery } = useBook();
+
+  const query = urlQuery ?? lastQuery ?? '';
 
   const [books, setBooks] = useState<Book[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!query) return;
+    if (!query) {
+      setBooks([]);
+      setReady(true);
+      return;
+    }
+
+    setLastQuery(query);
 
     let cancelled = false;
     setReady(false);
@@ -254,8 +323,6 @@ export default function SearchPageClient() {
 
       await preloadBookTextures(results);
 
-      await new Promise((r) => setTimeout(r, 100));
-
       if (!cancelled) setReady(true);
     })();
 
@@ -266,7 +333,7 @@ export default function SearchPageClient() {
 
   return (
     <div className="page-transparent">
-      {!ready && <LoadingScreen isLoading minDuration={1000} />}
+      {!ready && <LoadingScreen isLoading minDuration={800} />}
       {ready && <SearchGallery books={books} />}
     </div>
   );

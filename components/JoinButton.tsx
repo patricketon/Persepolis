@@ -366,6 +366,110 @@
 
 
 
+// // app/components/JoinButton.tsx
+// "use client"
+
+// import { useState } from "react"
+// import { supabaseBrowser } from "@/lib/supabaseBrowser"
+
+// export function JoinButton({
+//   sessionId,
+//   bookId,
+// }: {
+//   sessionId: string
+//   bookId: string
+// }) {
+//   const [loading, setLoading] = useState(false)
+
+//   async function handleJoin() {
+//     if (loading) return
+//     setLoading(true)
+
+//     const supabase = supabaseBrowser()
+
+//     // ─────────────────────────────
+//     // 1. AUTH CHECK
+//     // ─────────────────────────────
+//     const {
+//       data: { user },
+//       error: userErr,
+//     } = await supabase.auth.getUser()
+   
+
+//     console.log("[JOINBUTTON] getUser:", { user, userErr })
+
+//     if (!user) {
+//       const { data: sess } = await supabase.auth.getSession()
+//       console.log(
+//         "[JOINBUTTON] no user -> redirect /auth. getSession:",
+//         sess.session
+//       )
+
+//       window.location.href = `/auth?returnTo=${encodeURIComponent(
+//         `/book/${bookId}`
+//       )}`
+//       return
+//     }
+
+//     // ─────────────────────────────
+//     // 2. PROFILE CHECK (FULL ROW)
+//     // ─────────────────────────────
+//     const { data: profile, error: profileErr } = await supabase
+//       .from("profiles")
+//       .select("*")
+//       .eq("id", user.id)
+//       .maybeSingle()
+
+//     console.log("[PROFILE CHECK][JoinButton]", {
+//       userId: user.id,
+//       profile,
+//       profileErr,
+//     })
+
+//     if (!profile || !profile.is_21_plus) {
+//       console.log("[PROFILE CHECK][JoinButton] redirect -> /auth/complete")
+
+//       window.location.href = `/auth/complete?returnTo=${encodeURIComponent(
+//         `/book/${bookId}`
+//       )}`
+//       return
+//     }
+
+//     // ─────────────────────────────
+//     // 3. JOIN SESSION
+//     // ─────────────────────────────
+//     const res = await fetch("/api/join", {
+//       method: "POST",
+//       credentials: "include",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ sessionId }),
+//     })
+
+//     console.log("[JOINBUTTON] /api/join status:", res.status)
+
+//     if (res.status === 401) {
+//       console.log("[JOINBUTTON] 401 -> redirect /auth")
+
+//       window.location.href = `/auth?returnTo=${encodeURIComponent(
+//         `/book/${bookId}`
+//       )}`
+//       return
+//     }
+
+//     // ─────────────────────────────
+//     // 4. ENTER SESSION
+//     // ─────────────────────────────
+//     window.location.href = `/session/${sessionId}`
+//   }
+
+//   return (
+//     <button onClick={handleJoin} disabled={loading}>
+//       {loading ? "Reserving…" : "Join Session"}
+//     </button>
+//   )
+// }
+
+
 // app/components/JoinButton.tsx
 "use client"
 
@@ -388,22 +492,16 @@ export function JoinButton({
     const supabase = supabaseBrowser()
 
     // ─────────────────────────────
-    // 1. AUTH CHECK
+    // 1. AUTH CHECK (STABLE VERSION)
     // ─────────────────────────────
-    const {
-      data: { user },
-      error: userErr,
-    } = await supabase.auth.getUser()
+    const { data: { session }, error: sessionErr } =
+      await supabase.auth.getSession()
 
-    console.log("[JOINBUTTON] getUser:", { user, userErr })
+    const user = session?.user ?? null
+
+    console.log("[JOINBUTTON] session:", session, sessionErr)
 
     if (!user) {
-      const { data: sess } = await supabase.auth.getSession()
-      console.log(
-        "[JOINBUTTON] no user -> redirect /auth. getSession:",
-        sess.session
-      )
-
       window.location.href = `/auth?returnTo=${encodeURIComponent(
         `/book/${bookId}`
       )}`
@@ -411,7 +509,7 @@ export function JoinButton({
     }
 
     // ─────────────────────────────
-    // 2. PROFILE CHECK (FULL ROW)
+    // 2. PROFILE CHECK
     // ─────────────────────────────
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
@@ -426,8 +524,6 @@ export function JoinButton({
     })
 
     if (!profile || !profile.is_21_plus) {
-      console.log("[PROFILE CHECK][JoinButton] redirect -> /auth/complete")
-
       window.location.href = `/auth/complete?returnTo=${encodeURIComponent(
         `/book/${bookId}`
       )}`
@@ -447,8 +543,6 @@ export function JoinButton({
     console.log("[JOINBUTTON] /api/join status:", res.status)
 
     if (res.status === 401) {
-      console.log("[JOINBUTTON] 401 -> redirect /auth")
-
       window.location.href = `/auth?returnTo=${encodeURIComponent(
         `/book/${bookId}`
       )}`

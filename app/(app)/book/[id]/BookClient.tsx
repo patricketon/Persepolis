@@ -787,7 +787,7 @@
 //       )}
 //     </div>
 //   );
-// }
+// // }
 
 'use client';
 
@@ -796,8 +796,8 @@ import { OrbitControls, Sky, Stars } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import Book from '../Book';
 import Grass from '@/components/Grass/Grass';
-import { Book as BookType } from '../../types/books';
-import { useBook } from '../../context/BookContext';
+import { Book as BookType } from '../../../types/books';
+import { useBook } from '../../../context/BookContext';
 import { SessionTimePicker } from '@/components/SessionTimePicker';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import '@/components/SessionTimePicker.css';
@@ -816,7 +816,9 @@ export default function BookClient({ book }: { book?: BookType }) {
     selectedBook?.id ??
     null;
 
+  // ─────────────────────────────
   // Fetch book on direct route load
+  // ─────────────────────────────
   useEffect(() => {
     if (book || selectedBook || !bookId) return;
 
@@ -829,14 +831,30 @@ export default function BookClient({ book }: { book?: BookType }) {
     })();
   }, [book, selectedBook, bookId]);
 
+  // ─────────────────────────────
   // Resume pending session after auth/profile
+  // ─────────────────────────────
   useEffect(() => {
     const pendingSession = sessionStorage.getItem('pendingSessionId');
-    if (pendingSession) {
-      console.log('[BOOKCLIENT] resuming pending session:', pendingSession);
-      sessionStorage.removeItem('pendingSessionId');
-      window.location.href = `/session/${pendingSession}`;
-    }
+    if (!pendingSession) return;
+
+    console.log('[BOOKCLIENT] resuming pending session:', pendingSession);
+    sessionStorage.removeItem('pendingSessionId');
+
+    (async () => {
+      const res = await fetch('/api/join', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: pendingSession }),
+      });
+
+      if (res.ok) {
+        window.location.href = `/session/${pendingSession}`;
+      } else {
+        console.error('[BOOKCLIENT] auto-join failed:', res.status);
+      }
+    })();
   }, []);
 
   if (!resolvedBook || !bookId) {
@@ -847,6 +865,9 @@ export default function BookClient({ book }: { book?: BookType }) {
     );
   }
 
+  // ─────────────────────────────
+  // Join Intent Flow
+  // ─────────────────────────────
   const handleJoinIntent = async (
     startTimeUtc: string,
     durationMinutes: number
@@ -873,11 +894,16 @@ export default function BookClient({ book }: { book?: BookType }) {
     console.log('[BOOKCLIENT] session ensured:', sessionId);
 
     const supabase = supabaseBrowser();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    console.log('[BOOKCLIENT] auth check user:', user?.id ?? null);
+    // ─────────────────────────────
+    // STABLE AUTH CHECK
+    // ─────────────────────────────
+    const { data: { session }, error: sessionErr } =
+      await supabase.auth.getSession();
+
+    const user = session?.user ?? null;
+
+    console.log('[BOOKCLIENT] session check:', session, sessionErr);
 
     if (!user) {
       sessionStorage.setItem('pendingSessionId', sessionId);

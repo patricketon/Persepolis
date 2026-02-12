@@ -1,5 +1,4 @@
-// app/(app)/layout.tsx
-import NavBar from "../../components/Navigation/NavBar"
+import HomeButton from "@/components/Navigation/HomeButton";
 
 export default function AppLayout({
   children,
@@ -8,7 +7,7 @@ export default function AppLayout({
 }) {
   return (
     <>
-      <NavBar />
+      <HomeButton />
       {children}
     </>
   );

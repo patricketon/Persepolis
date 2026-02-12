@@ -49,7 +49,7 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 
 // Validate ../../app/BookCard/page.tsx
 {
-  const handler = {} as typeof import("../legacycode/UI/BookCover/page.jsx")
+  const handler = {} as typeof import("../legacycode/UI/BookCover/page.js")
   handler satisfies AppPageConfig<"/BookCard">
 }
 
@@ -68,7 +68,7 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 
 // Validate ../../app/book/[id]/page.tsx
 {
-  const handler = {} as typeof import("../book/[id]/page.jsx")
+  const handler = {} as typeof import("../(app)/book/[id]/page.js")
   handler satisfies AppPageConfig<"/book/[id]">
 }
 
@@ -86,7 +86,7 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 
 // Validate ../../app/searchPage/page.tsx
 {
-  const handler = {} as typeof import("../(app)/searchPage/SearchPageClient.jsx")
+  const handler = {} as typeof import("../(gallery)/searchPage/SearchPageClient.js")
   handler satisfies AppPageConfig<"/searchPage">
 }
 

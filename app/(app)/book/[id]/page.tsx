@@ -120,8 +120,8 @@
 // }
 
 import BookClientWrapper from './BookClientWrapper';
-import { BOOKS } from '../../data/books';
-import type { Book } from '../../types/books';
+import { BOOKS } from '../../../data/books';
+import type { Book } from '../../../types/books';
 
 export default async function BookPage({
   params,
