@@ -548,6 +548,20 @@ export function JoinButton({
       )}`
       return
     }
+    // 💳 Subscription required — redirect to checkout
+    if (res.status === 403) {
+      const data = await res.json()
+      if (data.error === "subscription_required") {
+        const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
+        const checkout = await checkoutRes.json()
+        if (checkout.url) {
+          window.location.href = checkout.url
+          return
+        }
+      }
+      setLoading(false)
+      return
+    }
 
     // ─────────────────────────────
     // 4. ENTER SESSION

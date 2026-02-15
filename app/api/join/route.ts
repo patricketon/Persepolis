@@ -415,12 +415,22 @@ console.log("[API JOIN] all cookies:", cookieStore.getAll().map(c => c.name))
     data: { user },
   } = await supabaseAuth.auth.getUser()
 
-  console.log("[API JOIN] user:", user?.id)
+   console.log("[API JOIN] user:", user?.id)
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  // 💳 Check subscription before allowing join
+  const { hasActiveSubscription } = await import("@/lib/subscription")
+  const isSubscribed = await hasActiveSubscription(user.id)
+
+  if (!isSubscribed) {
+    return NextResponse.json(
+      { error: "subscription_required", message: "An active subscription is required to join sessions." },
+      { status: 403 }
+    )
+  }
   // 🔒 Service role for DB write
   const supabase = supabaseServer()
 

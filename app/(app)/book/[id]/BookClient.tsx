@@ -851,6 +851,16 @@ export default function BookClient({ book }: { book?: BookType }) {
 
       if (res.ok) {
         window.location.href = `/session/${pendingSession}`;
+      } else if (res.status === 403) {
+        const data = await res.json()
+        if (data.error === "subscription_required") {
+          const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
+          const checkout = await checkoutRes.json()
+          if (checkout.url) {
+            window.location.href = checkout.url
+            return
+          }
+        }
       } else {
         console.error('[BOOKCLIENT] auto-join failed:', res.status);
       }
@@ -937,6 +947,19 @@ export default function BookClient({ book }: { book?: BookType }) {
     });
 
     console.log('[BOOKCLIENT] /api/join status:', joinRes.status);
+
+    if (joinRes.status === 403) {
+      const data = await joinRes.json()
+      if (data.error === "subscription_required") {
+        const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
+        const checkout = await checkoutRes.json()
+        if (checkout.url) {
+          window.location.href = checkout.url
+          return
+        }
+      }
+      return
+    }
 
     if (!joinRes.ok) {
       const text = await joinRes.text();

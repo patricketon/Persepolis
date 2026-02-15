@@ -275,6 +275,71 @@
 //   );
 // }
 
+// 'use client';
+
+// import { useEffect, useState } from 'react';
+// import { useSearchParams } from 'next/navigation';
+// import { searchBooks } from '@/lib/books/searchBooks';
+// import { preloadBookTextures } from '@/lib/books/preloadTexture';
+// import { preloadWaterAssets } from '@/lib/water/preloadWaterAssets';
+// import SearchGallery from '@/components/Search3DGallery/SearchGallery';
+// import LoadingScreen from '@/components/LoadingScreen/LoadingScreen';
+// import type { Book } from '@/app/types/books';
+// import { waterUniforms } from '@/components/water/WaterMaterial';
+// import { useBook } from '@/app/context/BookContext';
+
+// export default function SearchPageClient() {
+//   const searchParams = useSearchParams();
+//   const urlQuery = searchParams.get('query');
+//   const { lastQuery, setLastQuery } = useBook();
+
+//   const query = urlQuery ?? lastQuery ?? '';
+
+//   const [books, setBooks] = useState<Book[]>([]);
+//   const [ready, setReady] = useState(false);
+
+//   useEffect(() => {
+//     if (!query) {
+//       setBooks([]);
+//       setReady(true);
+//       return;
+//     }
+
+//     setLastQuery(query);
+
+//     let cancelled = false;
+//     setReady(false);
+
+//     (async () => {
+//       const results = await searchBooks(query);
+//       if (cancelled) return;
+
+//       setBooks(results);
+
+//       const { dudv, base, env } = await preloadWaterAssets();
+//       waterUniforms.iChannel0.value = base;
+//       waterUniforms.iChannel1.value = env;
+//       waterUniforms.iChannel2.value = dudv;
+
+//       await preloadBookTextures(results);
+
+//       if (!cancelled) setReady(true);
+//     })();
+
+//     return () => {
+//       cancelled = true;
+//     };
+//   }, [query]);
+
+//   return (
+//     <div className="page-transparent">
+//       {!ready && <LoadingScreen isLoading minDuration={800} />}
+//       {ready && <SearchGallery books={books} />}
+//     </div>
+//   );
+// }
+
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -298,6 +363,25 @@ export default function SearchPageClient() {
   const [books, setBooks] = useState<Book[]>([]);
   const [ready, setReady] = useState(false);
 
+  // ✅ Load water once on mount (independent of search)
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const { dudv, base, env } = await preloadWaterAssets();
+      if (cancelled) return;
+
+      waterUniforms.iChannel0.value = base;
+      waterUniforms.iChannel1.value = env;
+      waterUniforms.iChannel2.value = dudv;
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ✅ Handle search logic separately
   useEffect(() => {
     if (!query) {
       setBooks([]);
@@ -315,11 +399,6 @@ export default function SearchPageClient() {
       if (cancelled) return;
 
       setBooks(results);
-
-      const { dudv, base, env } = await preloadWaterAssets();
-      waterUniforms.iChannel0.value = base;
-      waterUniforms.iChannel1.value = env;
-      waterUniforms.iChannel2.value = dudv;
 
       await preloadBookTextures(results);
 
