@@ -1021,6 +1021,7 @@ export default function BookClient({ book }: { book?: BookType }) {
   const [showPicker, setShowPicker] = useState(false);
 
   const resolvedBook = book ?? selectedBook ?? fetchedBook;
+  console.log("resolvedBook:", resolvedBook)
 
   const bookId =
     book?.volumeId ??

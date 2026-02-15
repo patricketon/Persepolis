@@ -122,6 +122,7 @@
 import BookClientWrapper from './BookClientWrapper';
 import { BOOKS } from '../../../data/books';
 import type { Book } from '../../../types/books';
+import { getCoverUrl } from '@/lib/books/cover';
 
 async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
   try {
@@ -144,9 +145,7 @@ async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
     }
 
     const coverId = data.covers?.[0]
-    const thumbnail = coverId
-      ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
-      : undefined
+    const thumbnail = coverId ? getCoverUrl(coverId) : undefined;
 
     return {
       id,
