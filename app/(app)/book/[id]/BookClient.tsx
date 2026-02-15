@@ -789,6 +789,219 @@
 //   );
 // // }
 
+// 'use client';
+
+// import { Canvas } from '@react-three/fiber';
+// import { OrbitControls, Sky, Stars } from '@react-three/drei';
+// import { Suspense, useState, useEffect } from 'react';
+// import Book from '../Book';
+// import Grass from '@/components/Grass/Grass';
+// import { Book as BookType } from '../../../types/books';
+// import { useBook } from '../../../context/BookContext';
+// import { SessionTimePicker } from '@/components/SessionTimePicker';
+// import { supabaseBrowser } from '@/lib/supabaseBrowser';
+// import '@/components/SessionTimePicker.css';
+// import { redirectToAuth } from "@/lib/redirectToAuth";
+
+// export default function BookClient({ book }: { book?: BookType }) {
+//   const { selectedBook } = useBook();
+//   const [fetchedBook, setFetchedBook] = useState<BookType | null>(null);
+//   const [showPicker, setShowPicker] = useState(false);
+
+//   const resolvedBook = book ?? selectedBook ?? fetchedBook;
+
+//   const bookId =
+//     book?.volumeId ??
+//     book?.id ??
+//     selectedBook?.volumeId ??
+//     selectedBook?.id ??
+//     null;
+
+//   // ─────────────────────────────
+//   // Fetch book on direct route load
+//   // ─────────────────────────────
+//   useEffect(() => {
+//     if (book || selectedBook || !bookId) return;
+
+//     (async () => {
+//       console.log('[BOOKCLIENT] fetching book by id:', bookId);
+//       const res = await fetch(`/api/books/${bookId}`);
+//       if (!res.ok) return;
+//       const data = await res.json();
+//       setFetchedBook(data);
+//     })();
+//   }, [book, selectedBook, bookId]);
+
+//   // ─────────────────────────────
+//   // Resume pending session after auth/profile
+//   // ─────────────────────────────
+//   useEffect(() => {
+//     const pendingSession = sessionStorage.getItem('pendingSessionId');
+//     if (!pendingSession) return;
+
+//     console.log('[BOOKCLIENT] resuming pending session:', pendingSession);
+//     sessionStorage.removeItem('pendingSessionId');
+
+//     (async () => {
+//       const res = await fetch('/api/join', {
+//         method: 'POST',
+//         credentials: 'include',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ sessionId: pendingSession }),
+//       });
+
+//       if (res.ok) {
+//         window.location.href = `/session/${pendingSession}`;
+//       } else if (res.status === 403) {
+//         const data = await res.json()
+//         if (data.error === "subscription_required") {
+//           const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
+//           const checkout = await checkoutRes.json()
+//           if (checkout.url) {
+//             window.location.href = checkout.url
+//             return
+//           }
+//         }
+//       } else {
+//         console.error('[BOOKCLIENT] auto-join failed:', res.status);
+//       }
+//     })();
+//   }, []);
+
+//   if (!resolvedBook || !bookId) {
+//     return (
+//       <div className="w-screen h-screen flex items-center justify-center bg-black text-white">
+//         Loading book…
+//       </div>
+//     );
+//   }
+
+//   // ─────────────────────────────
+//   // Join Intent Flow
+//   // ─────────────────────────────
+//   const handleJoinIntent = async (
+//     startTimeUtc: string,
+//     durationMinutes: number
+//   ) => {
+//     console.log('[BOOKCLIENT] join intent started');
+
+//     const ensureRes = await fetch('/api/sessions/ensure', {
+//       method: 'POST',
+//       credentials: 'include',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//         bookId,
+//         startTimeUtc,
+//         durationMinutes,
+//       }),
+//     });
+
+//     if (!ensureRes.ok) {
+//       console.error('[BOOKCLIENT] session ensure failed');
+//       return;
+//     }
+
+//     const { sessionId } = await ensureRes.json();
+//     console.log('[BOOKCLIENT] session ensured:', sessionId);
+
+//     const supabase = supabaseBrowser();
+
+//     // ─────────────────────────────
+//     // STABLE AUTH CHECK
+//     // ─────────────────────────────
+//     const { data: { session }, error: sessionErr } =
+//       await supabase.auth.getSession();
+
+//     const user = session?.user ?? null;
+
+//     console.log('[BOOKCLIENT] session check:', session, sessionErr);
+
+//     if (!user) {
+//       sessionStorage.setItem('pendingSessionId', sessionId);
+
+//       const returnPath =
+//         window.location.pathname + window.location.search;
+
+//       window.location.href = `/auth?returnTo=${encodeURIComponent(returnPath)}`;
+//       return;
+//     }
+
+//     const { data: profile } = await supabase
+//       .from('profiles')
+//       .select('is_21_plus')
+//       .eq('id', user.id)
+//       .single();
+
+//     console.log('[BOOKCLIENT] profile check:', profile);
+
+//     if (!profile?.is_21_plus) {
+//       sessionStorage.setItem('pendingSessionId', sessionId);
+//       window.location.href = `/auth/complete?returnTo=${encodeURIComponent(
+//         `/book/${bookId}`
+//       )}`;
+//       return;
+//     }
+
+//     const joinRes = await fetch('/api/join', {
+//       method: 'POST',
+//       credentials: 'include',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({ sessionId }),
+//     });
+
+//     console.log('[BOOKCLIENT] /api/join status:', joinRes.status);
+
+//     if (joinRes.status === 403) {
+//       const data = await joinRes.json()
+//       if (data.error === "subscription_required") {
+//         const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
+//         const checkout = await checkoutRes.json()
+//         if (checkout.url) {
+//           window.location.href = checkout.url
+//           return
+//         }
+//       }
+//       return
+//     }
+
+//     if (!joinRes.ok) {
+//       const text = await joinRes.text();
+//       console.error('[BOOKCLIENT] join failed:', text);
+//       return;
+//     }
+
+//     window.location.href = `/session/${sessionId}`;
+//   };
+
+//   return (
+//     <div style={{ width: '100vw', height: '100vh' }}>
+//       <Canvas camera={{ position: [0, 0, 8] }}>
+//         <Sky />
+//         <Stars radius={30} depth={70} count={20000} factor={2} fade />
+//         <ambientLight intensity={2.5} />
+//         <directionalLight position={[10, 10, 5]} intensity={1} />
+//         <OrbitControls />
+//         <Suspense fallback={null}>
+//           <Grass />
+//           <group position={[0, 2, 0]}>
+//             <Book
+//               coverUrl={resolvedBook.imageLinks?.thumbnail}
+//               onScheduleClick={() => setShowPicker(true)}
+//               hideButton={showPicker}
+//             />
+//           </group>
+//         </Suspense>
+//       </Canvas>
+
+//       {showPicker && (
+//         <SessionTimePicker
+//           onSelect={handleJoinIntent}
+//           onClose={() => setShowPicker(false)}
+//         />
+//       )}
+//     </div>
+//   );
+// }
 'use client';
 
 import { Canvas } from '@react-three/fiber';
@@ -816,14 +1029,10 @@ export default function BookClient({ book }: { book?: BookType }) {
     selectedBook?.id ??
     null;
 
-  // ─────────────────────────────
-  // Fetch book on direct route load
-  // ─────────────────────────────
   useEffect(() => {
     if (book || selectedBook || !bookId) return;
 
     (async () => {
-      console.log('[BOOKCLIENT] fetching book by id:', bookId);
       const res = await fetch(`/api/books/${bookId}`);
       if (!res.ok) return;
       const data = await res.json();
@@ -831,14 +1040,10 @@ export default function BookClient({ book }: { book?: BookType }) {
     })();
   }, [book, selectedBook, bookId]);
 
-  // ─────────────────────────────
-  // Resume pending session after auth/profile
-  // ─────────────────────────────
   useEffect(() => {
     const pendingSession = sessionStorage.getItem('pendingSessionId');
     if (!pendingSession) return;
 
-    console.log('[BOOKCLIENT] resuming pending session:', pendingSession);
     sessionStorage.removeItem('pendingSessionId');
 
     (async () => {
@@ -851,18 +1056,25 @@ export default function BookClient({ book }: { book?: BookType }) {
 
       if (res.ok) {
         window.location.href = `/session/${pendingSession}`;
-      } else if (res.status === 403) {
-        const data = await res.json()
-        if (data.error === "subscription_required") {
-          const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
-          const checkout = await checkoutRes.json()
+        return;
+      }
+
+      if (res.status === 403) {
+        const data = await res.json();
+        if (data.error === 'subscription_required') {
+          const checkoutRes = await fetch(
+            `/api/stripe/checkout?returnTo=${encodeURIComponent(
+              window.location.pathname + window.location.search
+            )}`,
+            { method: 'POST' }
+          );
+
+          const checkout = await checkoutRes.json();
           if (checkout.url) {
-            window.location.href = checkout.url
-            return
+            window.location.href = checkout.url;
+            return;
           }
         }
-      } else {
-        console.error('[BOOKCLIENT] auto-join failed:', res.status);
       }
     })();
   }, []);
@@ -875,15 +1087,10 @@ export default function BookClient({ book }: { book?: BookType }) {
     );
   }
 
-  // ─────────────────────────────
-  // Join Intent Flow
-  // ─────────────────────────────
   const handleJoinIntent = async (
     startTimeUtc: string,
     durationMinutes: number
   ) => {
-    console.log('[BOOKCLIENT] join intent started');
-
     const ensureRes = await fetch('/api/sessions/ensure', {
       method: 'POST',
       credentials: 'include',
@@ -895,31 +1102,24 @@ export default function BookClient({ book }: { book?: BookType }) {
       }),
     });
 
-    if (!ensureRes.ok) {
-      console.error('[BOOKCLIENT] session ensure failed');
-      return;
-    }
+    if (!ensureRes.ok) return;
 
     const { sessionId } = await ensureRes.json();
-    console.log('[BOOKCLIENT] session ensured:', sessionId);
 
     const supabase = supabaseBrowser();
-
-    // ─────────────────────────────
-    // STABLE AUTH CHECK
-    // ─────────────────────────────
-    const { data: { session }, error: sessionErr } =
-      await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
     const user = session?.user ?? null;
 
-    console.log('[BOOKCLIENT] session check:', session, sessionErr);
-
     if (!user) {
       sessionStorage.setItem('pendingSessionId', sessionId);
-      window.location.href = `/auth?returnTo=${encodeURIComponent(
-        `/book/${bookId}`
-      )}`;
+
+      const returnPath =
+        window.location.pathname + window.location.search;
+
+      window.location.href = `/auth?returnTo=${encodeURIComponent(returnPath)}`;
       return;
     }
 
@@ -929,12 +1129,14 @@ export default function BookClient({ book }: { book?: BookType }) {
       .eq('id', user.id)
       .single();
 
-    console.log('[BOOKCLIENT] profile check:', profile);
-
     if (!profile?.is_21_plus) {
       sessionStorage.setItem('pendingSessionId', sessionId);
+
+      const returnPath =
+        window.location.pathname + window.location.search;
+
       window.location.href = `/auth/complete?returnTo=${encodeURIComponent(
-        `/book/${bookId}`
+        returnPath
       )}`;
       return;
     }
@@ -946,26 +1148,26 @@ export default function BookClient({ book }: { book?: BookType }) {
       body: JSON.stringify({ sessionId }),
     });
 
-    console.log('[BOOKCLIENT] /api/join status:', joinRes.status);
-
     if (joinRes.status === 403) {
-      const data = await joinRes.json()
-      if (data.error === "subscription_required") {
-        const checkoutRes = await fetch("/api/stripe/checkout", { method: "POST" })
-        const checkout = await checkoutRes.json()
+      const data = await joinRes.json();
+      if (data.error === 'subscription_required') {
+        const checkoutRes = await fetch(
+          `/api/stripe/checkout?returnTo=${encodeURIComponent(
+            window.location.pathname + window.location.search
+          )}`,
+          { method: 'POST' }
+        );
+
+        const checkout = await checkoutRes.json();
         if (checkout.url) {
-          window.location.href = checkout.url
-          return
+          window.location.href = checkout.url;
+          return;
         }
       }
-      return
-    }
-
-    if (!joinRes.ok) {
-      const text = await joinRes.text();
-      console.error('[BOOKCLIENT] join failed:', text);
       return;
     }
+
+    if (!joinRes.ok) return;
 
     window.location.href = `/session/${sessionId}`;
   };

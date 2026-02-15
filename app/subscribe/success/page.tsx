@@ -1,18 +1,21 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export default function SubscribeSuccess() {
   const router = useRouter()
+  const params = useSearchParams()
+
+  const returnTo = params.get("returnTo") || "/searchPage"
 
   useEffect(() => {
-    // Redirect to explore page after 3 seconds
     const timeout = setTimeout(() => {
-      router.push("/explore")
-    }, 3000)
+      router.push(returnTo)
+    }, 2000)
+
     return () => clearTimeout(timeout)
-  }, [router])
+  }, [router, returnTo])
 
   return (
     <div
@@ -32,7 +35,7 @@ export default function SubscribeSuccess() {
         Welcome to Persepolis
       </h1>
       <p style={{ fontSize: "1.1rem", opacity: 0.8 }}>
-        Your 14-day free trial has started. Redirecting you to explore...
+        Your 14-day free trial has started. Redirecting you...
       </p>
     </div>
   )

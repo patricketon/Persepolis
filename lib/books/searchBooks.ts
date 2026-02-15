@@ -109,9 +109,14 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
   // 1. Broad search
   const res = await fetch(
-    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=40`
+    `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=40`,
+    {
+      headers: {
+        "User-Agent": "Persepolis/1.0 (persepolis.world)"
+      },
+      cache: "no-store",
+    }
   )
-  if (!res.ok) throw new Error('Search failed')
 
   const data = await res.json()
   const docs = data.docs || []

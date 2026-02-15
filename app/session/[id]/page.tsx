@@ -64,7 +64,7 @@ export default async function SessionPage({
   } = await supabaseAuth.auth.getUser()
 
   if (!user) {
-    redirect(`/auth?returnTo=/session/${id}`)
+  redirect(`/auth?returnTo=${encodeURIComponent(`/session/${id}`)}`)
   }
 
   const supabase = supabaseServer()
@@ -87,7 +87,7 @@ export default async function SessionPage({
     .maybeSingle()
 
   if (!participant || participant.status !== "joined") {
-    redirect(`/auth?returnTo=/session/${id}`)
+  redirect(`/auth?returnTo=${encodeURIComponent(`/session/${id}`)}`)
   }
 
   return (

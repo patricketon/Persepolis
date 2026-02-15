@@ -123,6 +123,45 @@ import BookClientWrapper from './BookClientWrapper';
 import { BOOKS } from '../../../data/books';
 import type { Book } from '../../../types/books';
 
+async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
+  try {
+    const res = await fetch(`https://openlibrary.org/works/${id}.json`, {
+      next: { revalidate: 3600 },
+    })
+    if (!res.ok) return null
+
+    const data = await res.json()
+
+    let author = 'Unknown'
+    if (data.authors?.[0]?.author?.key) {
+      const authorRes = await fetch(
+        `https://openlibrary.org${data.authors[0].author.key}.json`
+      )
+      if (authorRes.ok) {
+        const authorData = await authorRes.json()
+        author = authorData.name || 'Unknown'
+      }
+    }
+
+    const coverId = data.covers?.[0]
+    const thumbnail = coverId
+      ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
+      : undefined
+
+    return {
+      id,
+      title: data.title || 'Untitled',
+      author,
+      year: data.first_publish_date
+        ? parseInt(data.first_publish_date)
+        : undefined,
+      imageLinks: thumbnail ? { thumbnail } : undefined,
+    }
+  } catch {
+    return null
+  }
+}
+
 export default async function BookPage({
   params,
 }: {
@@ -130,7 +169,6 @@ export default async function BookPage({
 }) {
   const { id } = await params;
 
-  // 1. Try canonical curated books
   const canon = BOOKS.find(
     (b) => b.volumeId === id || b.id === id
   );
@@ -139,8 +177,15 @@ export default async function BookPage({
     return <BookClientWrapper book={canon as any} />;
   }
 
-  // 2. Fallback: search-origin book via context cookie
-  // (SearchGallery sets selectedBook before routing)
-  // BookClientWrapper already resolves selectedBook from context
-  return <BookClientWrapper />;
+  const olBook = await fetchOpenLibraryBook(id)
+
+  if (olBook) {
+    return <BookClientWrapper book={olBook as any} />;
+  }
+
+  return (
+    <div className="w-screen h-screen flex items-center justify-center bg-black text-white">
+      Book not found.
+    </div>
+  );
 }
