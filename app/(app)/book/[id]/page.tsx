@@ -119,6 +119,156 @@
 //   return <BookClientWrapper book={book} />;
 // }
 
+// import BookClientWrapper from './BookClientWrapper';
+// import { BOOKS } from '../../../data/books';
+// import type { Book } from '../../../types/books';
+// import { getCoverUrl } from '@/lib/books/cover';
+
+// async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
+//   try {
+//     const res = await fetch(`https://openlibrary.org/works/${id}.json`, {
+//       next: { revalidate: 3600 },
+//     })
+//     if (!res.ok) return null
+
+//     const data = await res.json()
+
+//     let author = 'Unknown'
+//     if (data.authors?.[0]?.author?.key) {
+//       const authorRes = await fetch(
+//         `https://openlibrary.org${data.authors[0].author.key}.json`
+//       )
+//       if (authorRes.ok) {
+//         const authorData = await authorRes.json()
+//         author = authorData.name || 'Unknown'
+//       }
+//     }
+
+//     const coverId = data.covers?.[0]
+//     const thumbnail = coverId ? getCoverUrl(coverId) : undefined;
+
+//     return {
+//       id,
+//       title: data.title || 'Untitled',
+//       author,
+//       year: data.first_publish_date
+//         ? parseInt(data.first_publish_date)
+//         : undefined,
+//       imageLinks: thumbnail ? { thumbnail } : undefined,
+//     }
+//   } catch {
+//     return null
+//   }
+// }
+
+// export default async function BookPage({
+//   params,
+// }: {
+//   params: Promise<{ id: string }>;
+// }) {
+//   const { id } = await params;
+
+//   const canon = BOOKS.find(
+//     (b) => b.volumeId === id || b.id === id
+//   );
+
+//   if (canon) {
+//     return <BookClientWrapper book={canon as any} />;
+//   }
+
+//   const olBook = await fetchOpenLibraryBook(id)
+
+//   if (olBook) {
+//     return <BookClientWrapper book={olBook as any} />;
+//   }
+
+//   return (
+//     <div className="w-screen h-screen flex items-center justify-center bg-black text-white">
+//       Book not found.
+//     </div>
+//   );
+// }
+
+
+
+// import BookClientWrapper from './BookClientWrapper';
+// import { BOOKS } from '../../../data/books';
+// import type { Book } from '../../../types/books';
+// import { getCoverUrl } from '@/lib/books/cover';
+
+// async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
+//   try {
+//     const res = await fetch(`https://openlibrary.org/works/${id}.json`, {
+//       next: { revalidate: 3600 },
+//     })
+//     if (!res.ok) return null
+
+//     const data = await res.json()
+
+//     let author = 'Unknown'
+//     if (data.authors?.[0]?.author?.key) {
+//       const authorRes = await fetch(
+//         `https://openlibrary.org${data.authors[0].author.key}.json`
+//       )
+//       if (authorRes.ok) {
+//         const authorData = await authorRes.json()
+//         author = authorData.name || 'Unknown'
+//       }
+//     }
+
+//     // Try covers from the Works API first
+//     const coverId = data.covers?.[0]
+//     let thumbnail = coverId ? getCoverUrl(coverId) : undefined;
+
+//     // Fallback: use the OL covers API by work OLID
+//     // Many works have covers accessible by OLID even when the covers array is missing
+//     if (!thumbnail) {
+//       thumbnail = `https://covers.openlibrary.org/b/olid/${id}-L.jpg`
+//     }
+
+//     return {
+//       id,
+//       title: data.title || 'Untitled',
+//       author,
+//       year: data.first_publish_date
+//         ? parseInt(data.first_publish_date)
+//         : undefined,
+//       imageLinks: thumbnail ? { thumbnail } : undefined,
+//     }
+//   } catch {
+//     return null
+//   }
+// }
+
+// export default async function BookPage({
+//   params,
+// }: {
+//   params: Promise<{ id: string }>;
+// }) {
+//   const { id } = await params;
+
+//   const canon = BOOKS.find(
+//     (b) => b.volumeId === id || b.id === id
+//   );
+
+//   if (canon) {
+//     return <BookClientWrapper book={canon as any} />;
+//   }
+
+//   const olBook = await fetchOpenLibraryBook(id)
+
+//   if (olBook) {
+//     return <BookClientWrapper book={olBook as any} />;
+//   }
+
+//   return (
+//     <div className="w-screen h-screen flex items-center justify-center bg-black text-white">
+//       Book not found.
+//     </div>
+//   );
+// }
+
+
 import BookClientWrapper from './BookClientWrapper';
 import { BOOKS } from '../../../data/books';
 import type { Book } from '../../../types/books';
@@ -144,6 +294,7 @@ async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
       }
     }
 
+    // Try covers from the Works API
     const coverId = data.covers?.[0]
     const thumbnail = coverId ? getCoverUrl(coverId) : undefined;
 
@@ -163,10 +314,13 @@ async function fetchOpenLibraryBook(id: string): Promise<Book | null> {
 
 export default async function BookPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ cover?: string }>;
 }) {
   const { id } = await params;
+  const { cover } = await searchParams;
 
   const canon = BOOKS.find(
     (b) => b.volumeId === id || b.id === id
@@ -177,6 +331,11 @@ export default async function BookPage({
   }
 
   const olBook = await fetchOpenLibraryBook(id)
+
+  // If the OL Works API didn't have a cover but the search passed one via query param, use it
+  if (olBook && !olBook.imageLinks?.thumbnail && cover) {
+    olBook.imageLinks = { thumbnail: decodeURIComponent(cover) };
+  }
 
   if (olBook) {
     return <BookClientWrapper book={olBook as any} />;

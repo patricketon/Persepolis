@@ -5,7 +5,7 @@ import { Room, Participant } from "livekit-client";
 import { useEffect, useState } from "react";
 import { ParticipantTile } from "./ParticipantTile";
 
-export function RoomGrid({ room }: { room: Room }) {
+export function RoomGrid({ room, nameMap}: { room: Room, nameMap: Record<string, string> }) {
   const [participants, setParticipants] = useState<Participant[]>([]);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export function RoomGrid({ room }: { room: Room }) {
   return (
     <div className="room-grid">
       {participants.map((p) => (
-        <ParticipantTile key={p.identity} participant={p} />
+        <ParticipantTile key={p.identity} participant={p} nameMap={nameMap} />
       ))}
     </div>
   );

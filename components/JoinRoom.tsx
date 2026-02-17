@@ -275,7 +275,7 @@ export function JoinRoom({
   const [connectionState, setConnectionState] = useState<
     "connecting" | "connected" | "reconnecting" | "failed"
   >("connecting")
-
+  const [nameMap, setNameMap] = useState<Record<string, string>>({})
   const reconnectAttempts = useRef(0)
   const maxReconnectAttempts = 3
 
@@ -338,8 +338,20 @@ export function JoinRoom({
     }
 
     // 5. Enable media AFTER connection
-    await lkRoom.localParticipant.setMicrophoneEnabled(true)
-    await lkRoom.localParticipant.setCameraEnabled(true)
+    // await lkRoom.localParticipant.setMicrophoneEnabled(true)
+    // await lkRoom.localParticipant.setCameraEnabled(true)
+
+    // Enable media — don't crash if user denies permissions
+    try {
+      await lkRoom.localParticipant.setMicrophoneEnabled(true)
+    } catch (e) {
+      console.warn("Mic permission denied:", e)
+    }
+    try {
+      await lkRoom.localParticipant.setCameraEnabled(true)
+    } catch (e) {
+      console.warn("Camera permission denied:", e)
+    }
 
     return lkRoom
   }, [sessionId, userId, isSessionOver, onEnd])
@@ -371,6 +383,33 @@ export function JoinRoom({
       activeRoom?.disconnect()
     }
   }, [connect])
+
+  // Load participant display names once room is connected
+useEffect(() => {
+  if (!room) return
+  const currentRoom = room;
+
+  async function loadNames() {
+    try {
+     
+      const res = await fetch(`/api/rooms/${currentRoom.name}/participants`)
+      if (!res.ok) return
+
+      const data = await res.json()
+
+      const map: Record<string, string> = {}
+      data.forEach((p: { user_id: string; display_name: string }) => {
+        map[p.user_id] = p.display_name
+      })
+
+      setNameMap(map)
+    } catch (e) {
+      console.error("Failed to load participant names:", e)
+    }
+  }
+
+  loadNames()
+}, [room])
 
   // Reconnect logic
   useEffect(() => {

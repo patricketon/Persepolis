@@ -298,24 +298,65 @@ export default function SessionLobby({
   }, [mounted, sessionStartTime, sessionEndTime, notify])
 
   // Ensure reservation + room check
+  // useEffect(() => {
+  //   if (!mounted || !userId) return
+
+  //   ;(async () => {
+  //     await fetch("/api/join", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ sessionId, userId }),
+  //     }).catch(() => {})
+
+  //     if (status === "live") {
+  //       await fetch(`/api/sessions/${sessionId}/groups`, { method: "POST" })
+  //       const res = await fetch(
+  //         `/api/sessions/${sessionId}/my-room?userId=${userId}`
+  //       )
+  //       setHasRoom(res.ok)
+  //     }
+  //   })()
+  // }, [mounted, sessionId, userId, status])
+
+  // Ensure reservation + wait for room assignment
   useEffect(() => {
     if (!mounted || !userId) return
 
-    ;(async () => {
-      await fetch("/api/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, userId }),
-      }).catch(() => {})
+    // Re-register (idempotent)
+    fetch("/api/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, userId }),
+    }).catch(() => {})
 
-      if (status === "live") {
-        await fetch(`/api/sessions/${sessionId}/groups`, { method: "POST" })
-        const res = await fetch(
-          `/api/sessions/${sessionId}/my-room?userId=${userId}`
-        )
-        setHasRoom(res.ok)
+    if (status !== "live") return
+
+    let cancelled = false
+
+    // Poll /my-room until the server-side grouping job assigns us
+    async function pollForRoom() {
+      while (!cancelled) {
+        const res = await fetch(`/api/sessions/${sessionId}/my-room`)
+
+        if (res.ok) {
+          setHasRoom(true)
+          return
+        }
+
+        if (res.status !== 404) {
+          setHasRoom(false)
+          return
+        }
+
+        await new Promise((r) => setTimeout(r, 2000))
       }
-    })()
+    }
+
+    pollForRoom()
+
+    return () => {
+      cancelled = true
+    }
   }, [mounted, sessionId, userId, status])
 
   // -------- Render --------

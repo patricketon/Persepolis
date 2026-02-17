@@ -4,7 +4,7 @@
 import { Participant, Track } from "livekit-client";
 import { useEffect, useRef } from "react";
 
-export function ParticipantTile({ participant }: { participant: Participant }) {
+export function ParticipantTile({ participant, nameMap }: { participant: Participant, nameMap: Record<string, string> }) {
   const videoRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +42,7 @@ export function ParticipantTile({ participant }: { participant: Participant }) {
     <div className="participant-tile">
       <div ref={videoRef} />
       <div ref={audioRef} />
-      <div>{participant.identity}</div>
+      <div>{nameMap[participant.identity] ?? participant.identity}</div>
     </div>
   );
 }

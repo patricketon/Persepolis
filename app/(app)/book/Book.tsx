@@ -427,6 +427,7 @@ import { useFrame } from '@react-three/fiber';
 import { useTexture, Html } from '@react-three/drei';
 import SkinnedPage from './SkinnedPage';
 
+
 useTexture.preload('https://images-na.ssl-images-amazon.com/images/P/1401997503.01.L.jpg');
 
 export default function Book({
@@ -442,12 +443,15 @@ export default function Book({
 }) {
   const groupRef = useRef<THREE.Group>(null);
 
+  console.log('[BOOK] coverUrl:', coverUrl);
   const coverTexture =
     coverUrl && !coverUrl.includes('-1-L.jpg')
       ? useTexture(coverUrl)
       : null;
 
   if (coverTexture) coverTexture.colorSpace = THREE.SRGBColorSpace;
+
+  console.log('[BOOK] coverTexture:', coverTexture, 'image:', coverTexture?.image);
 
   const [currentPage, setCurrentPage] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'sliding' | 'opening' | 'done'>('idle');

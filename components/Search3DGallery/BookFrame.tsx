@@ -945,6 +945,165 @@
 
 
 
+// 'use client';
+
+// import * as THREE from 'three';
+// import { useRef, useState, useMemo, useEffect } from 'react';
+// import { useFrame } from '@react-three/fiber';
+// import { Text, useCursor, Html } from '@react-three/drei';
+// import { easing } from 'maath';
+// import { useRouter } from 'next/navigation';
+// import type { Book } from '../../app/types/books';
+// import { useBook } from '../../app/context/BookContext';
+// import { getPreloadedTexture } from '../../lib/books/preloadTexture';
+// import { getCachedTexture } from '../../lib/books/textureCache';
+
+// const GOLDENRATIO = 1.61803398875;
+
+// interface BookFrameProps {
+//   book: Book;
+//   position: readonly [number, number, number];
+//   rotation: readonly [number, number, number];
+//   isActive?: boolean;
+// }
+
+// export default function BookFrame({
+//   book,
+//   position,
+//   rotation,
+//   isActive = false,
+// }: BookFrameProps) {
+//   const imageRef = useRef<THREE.Mesh>(null);
+//   const borderRef = useRef<THREE.Mesh>(null);
+//   const loader = useMemo(() => new THREE.TextureLoader(), []);
+//   const baseImageScale = useRef<[number, number, number]>([1, GOLDENRATIO, 1]);
+
+//   const [hovered, setHovered] = useState(false);
+//   const router = useRouter();
+//   const { setSelectedBook } = useBook();
+
+//   useCursor(hovered);
+
+//   const texture = useMemo(() => {
+//     if (!book.imageLinks?.thumbnail) return null;
+//     const preloaded = getPreloadedTexture(book.imageLinks.thumbnail);
+//     if (preloaded) return preloaded;
+//     return getCachedTexture(book.imageLinks.thumbnail, loader);
+//   }, [book.imageLinks?.thumbnail, loader]);
+
+//   useEffect(() => {
+//     if (!texture) return;
+
+//     const img = texture.image as HTMLImageElement | undefined;
+//     if (!img) return;
+
+//     const updateScale = () => {
+//       const aspect = img.width / img.height;
+//       const height = GOLDENRATIO;
+//       const width = height * aspect;
+//       baseImageScale.current = [width, height, 1];
+//     };
+
+//     if (img.complete) updateScale();
+//     else img.onload = updateScale;
+//   }, [texture]);
+
+//   useFrame((_, dt) => {
+//     if (!imageRef.current || !borderRef.current) return;
+
+//     const [bw, bh, bz] = baseImageScale.current;
+//     const hoverScale = !isActive && hovered ? 0.95 : 1;
+
+//     // cover scale
+//     easing.damp3(
+//       imageRef.current.scale,
+//       [bw * hoverScale, bh * hoverScale, bz],
+//       0.1,
+//       dt
+//     );
+
+//     // border scale (slightly larger)
+//     easing.damp3(
+//       borderRef.current.scale,
+//       [bw * hoverScale * 1.06, bh * hoverScale * 1.06, bz],
+//       0.1,
+//       dt
+//     );
+//   });
+
+//   return (
+//     <group position={position} rotation={rotation}>
+//       {/* Thin black border */}
+//       <mesh
+//         ref={borderRef}
+//         position={[0, GOLDENRATIO / 2, -0.01]}
+//       >
+//         <planeGeometry args={[1, 1]} />
+//         <meshBasicMaterial color="#000000" />
+//       </mesh>
+
+//       {/* Cover */}
+//       {texture ? (
+//         <mesh
+//           ref={imageRef}
+//           name={book.id}
+//           position={[0, GOLDENRATIO / 2, 0]}
+//           onPointerOver={(e) => {
+//             e.stopPropagation();
+//             setHovered(true);
+//           }}
+//           onPointerOut={() => setHovered(false)}
+//         >
+//           <planeGeometry args={[1, 1]} />
+//           <meshBasicMaterial map={texture} toneMapped={false} />
+//         </mesh>
+//       ) : (
+//         <mesh
+//           name={book.id}
+//           position={[0, GOLDENRATIO / 2, 0]}
+//         >
+//           <planeGeometry args={[1, GOLDENRATIO]} />
+//           <meshBasicMaterial color="#222" />
+//           <Text
+//             position={[0, 0, 0.01]}
+//             fontSize={0.1}
+//             color="white"
+//             anchorX="center"
+//             anchorY="middle"
+//             maxWidth={0.8}
+//           >
+//             {book.title}
+//           </Text>
+//         </mesh>
+//       )}
+
+//       {isActive && (
+//         <Html
+//           position={[0, -GOLDENRATIO / 2 + 1.15, 0]}
+//           center
+//           distanceFactor={15}
+//         >
+//           <button
+//             className="px-1.5 py-0.5 text-xs bg-blue-900/80 text-white rounded hover:bg-[#0a0f1f]"
+//             onClick={(e) => {
+//               e.stopPropagation();
+//               setSelectedBook(book);
+//               document.cookie = 'hasSelectedBook=1; path=/';
+//               router.push(`/book/${book.id}`);
+//             }}
+//           >
+//             Open
+//           </button>
+//         </Html>
+//       )}
+//     </group>
+//   );
+// }
+
+
+
+
+
 'use client';
 
 import * as THREE from 'three';
@@ -1089,7 +1248,10 @@ export default function BookFrame({
               e.stopPropagation();
               setSelectedBook(book);
               document.cookie = 'hasSelectedBook=1; path=/';
-              router.push(`/book/${book.id}`);
+              const coverParam = book.imageLinks?.thumbnail
+                ? `?cover=${encodeURIComponent(book.imageLinks.thumbnail)}`
+                : '';
+              router.push(`/book/${book.id}${coverParam}`);
             }}
           >
             Open

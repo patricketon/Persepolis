@@ -29,6 +29,7 @@
 export const fragment = `
 varying vec3 vColor;
 
+
 void main () {
     vec2 uv = gl_PointCoord;
     
@@ -42,11 +43,11 @@ void main () {
     float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
     
     // HDR color - VALUES ABOVE 1.0 IS THE KEY
-    //vec3 color = vec3(2.5, 1.2, 3.5); // electric purple
-    vec3 color = vec3(uv.x, uv.y, 2.0) * 2.0;
+    //vec3 color = vec3(1.8, 1.5, 3.5); // electric purple
+    vec3 color = vec3(uv.y, uv.y, 2.0) * 1.5;
     //vec3 color = vec3(0.3, 0.9, 0.5) * 1.4;
     //vec3 color = vec3(0.6, 0.5, 0.3) * 3.0;
-
+    
     gl_FragColor = vec4(color, alpha);
 }
 `
