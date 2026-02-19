@@ -497,7 +497,7 @@ useEffect(() => {
 
   return (
     <>
-      <RoomGrid room={room} />
+      <RoomGrid room={room} nameMap={nameMap} />
       <RoomControls
         room={room}
         onLeave={async () => {

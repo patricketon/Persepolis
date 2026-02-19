@@ -32,7 +32,10 @@ export async function POST(req: Request) {
     // ✅ Subscription created (trial started or paid)
     case "customer.subscription.created":
     case "customer.subscription.updated": {
-      const subscription = event.data.object as Stripe.Subscription
+      const subscription = event.data.object as Stripe.Subscription & {
+        current_period_start?: number
+        current_period_end?: number
+      }
       const customerId = subscription.customer as string
       const status = subscription.status // 'trialing', 'active', 'canceled', etc.
 
